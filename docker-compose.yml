@@ -1,0 +1,32 @@
+version: '3.8'
+services:
+  ygwebdb:
+    build:  # Fixed indentation
+      context: ./Docker-Files/db
+    image: fayeque123/ygwebdb
+    ports:
+      - "3306:3306"
+    volumes:
+      - ygwebdbdata:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=Fayeque123
+
+
+  ygwebapp:
+    build:  # Fixed indentation
+      context: ./Docker-Files/app
+    image: fayeque123/ygwebapp
+    ports:
+      - "8080:8080"
+    volumes: 
+      - ygwebappdata:/usr/local/tomcat/webapps
+
+  ygweb:
+    build:  # Fixed indentation
+      context: ./Docker-Files/web
+    image: fayeque123/ygwebnginx
+    ports:
+      - "80:80"
+volumes:
+  ygwebdbdata: {}
+  ygwebappdata: {}
