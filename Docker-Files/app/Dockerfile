@@ -1,13 +1,16 @@
-FROM openjdk:17 AS BUILD_IMAGE
-RUN apt update && apt install maven -y
+FROM alpine/git
+WORKDIR /app
 RUN git clone https://github.com/fayeque/ygweb.git
-RUN cd ygweb && mvn install
 
-FROM tomcat:9-jre11
+FROM maven:3.8.7-eclipse-temurin-17-alpine
+WORKDIR /app
+COPY --from=0 /app/ygweb /app 
+RUN mvn install 
 
-RUN rm -rf /usr/local/tomcat/webapps/*
-
-COPY --from=BUILD_IMAGE ygweb/target/web-0.0.1-SNAPSHOT.jar /usr/local/tomcat/webapps/ROOT.war
-
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+COPY --from=1 /app/target/web-0.0.1-SNAPSHOT.jar /app 
 EXPOSE 8080
-CMD ["catalina.sh", "run"]
+CMD ["java -jar web-0.0.1-SNAPSHOT.jar"]
+
+
