@@ -3,7 +3,7 @@
 # Stage 2: Build the project using Maven
 FROM maven:3.8.7-eclipse-temurin-17-alpine as build
 WORKDIR /app
-COPY --from=git-clone /app/ygweb /app 
+COPY . /app 
 RUN mvn install -DskipTests && ls -la target/
 
 # Stage 3: Run the built JAR file
