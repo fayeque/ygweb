@@ -37,6 +37,7 @@ public class Transaction {
     private String transactionPeriod;
     private LocalDateTime transactionDate;
     private String addedBy;
+    private String status;
     
     @ManyToOne
     @JoinColumn(name = "group_id",referencedColumnName = "groupId")

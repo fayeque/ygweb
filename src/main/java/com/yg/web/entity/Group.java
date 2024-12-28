@@ -48,12 +48,14 @@ public class Group {
     private Integer colletionAmount = 0;
     
     private LocalDateTime createdAt;
+    
+    private Integer totalExpense=0;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "created_by_id",referencedColumnName = "id")
     private User user;
     
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
         name = "group_members",
         joinColumns = @JoinColumn(name = "group_id"),
@@ -61,7 +63,7 @@ public class Group {
     )
     private List<Member> members;
     
-    @OneToMany(mappedBy = "user_group", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user_group", cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     private List<Transaction> transactions = new ArrayList<>();
     
     

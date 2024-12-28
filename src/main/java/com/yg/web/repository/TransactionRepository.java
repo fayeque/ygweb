@@ -20,8 +20,8 @@ public interface TransactionRepository extends JpaRepository<Transaction, Intege
     @Query("SELECT t FROM Transaction t WHERE t.member = :member AND t.user_group = :user_group")
     List<Transaction> findByMemberAndUserGroup(@Param("member") Member member, @Param("user_group") Group user_group);
     
-    @Query("SELECT t FROM Transaction t WHERE t.user_group = :user_group")
-    List<Transaction> findByUserGroup(@Param("user_group") Group user_group);
+    @Query("SELECT t FROM Transaction t WHERE t.user_group = :user_group and year=:year")
+    List<Transaction> findByUserGroup(@Param("user_group") Group user_group,@Param("year") int year);
     
 //    @Query(value = "SELECT A.id AS memberId, A.username, A.name, C.id AS transactionId, C.amount, C.year, C.transactionType, C.transactionDate " +
 //            "FROM members A " +

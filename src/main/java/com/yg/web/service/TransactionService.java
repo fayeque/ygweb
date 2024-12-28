@@ -3,6 +3,9 @@ package com.yg.web.service;
 import java.sql.Date;
 import java.util.Optional;
 
+import org.hibernate.event.spi.SaveOrUpdateEvent;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +24,9 @@ import com.yg.web.repository.MemberRepository;
 import com.yg.web.repository.RoleRepository;
 import com.yg.web.repository.TransactionRepository;
 import com.yg.web.repository.UserRepository;
+import com.yg.web.service.producerServices.CreateTransactionMessage;
+import com.yg.web.service.producerServices.KafkaProducerFactory;
+import com.yg.web.service.producerServices.ProducerService;
 import com.yg.web.service.utils.BuildResponseUtils;
 import com.yg.web.service.utils.RoleService;
 import com.yg.web.utils.SecurityUtils;
@@ -39,7 +45,12 @@ public class TransactionService {
     RoleService roleService;
     @Autowired
     BuildResponseUtils buildResponseUtils;
-
+    
+    @Autowired
+    KafkaProducerFactory kafkaProducerFactory;
+    
+    private Logger logger = LoggerFactory.getLogger(TransactionService.class);
+    
     public TransactionService(GroupRepository groupRepository, MemberRepository memberRepository, TransactionRepository transactionRepository
     		,RoleRepository roleRepository) {
         this.groupRepository = groupRepository;
@@ -51,6 +62,9 @@ public class TransactionService {
     @Transactional
     public ResponseEntity<SuccessResponseDto<Object>> addTransactionForMember(TransactionDto transactionDto) {
     	
+    	System.out.println("Username here is " + SecurityUtils.getUsername());
+    	System.out.println("Username here is " + transactionDto.getGroupId());
+    	System.out.println("transactionDto here is "  + transactionDto);
     	
     	if(!roleService.hasRole(transactionDto.getGroupId(),SecurityUtils.getUsername())) {
     		throw new GenericException("User does not have the permission");
@@ -59,6 +73,12 @@ public class TransactionService {
     	Member member = getMemberByUsername(transactionDto.getUsername());
     	
     	Long isExist = memberRepository.findMemberInGroup(member.getId(), transactionDto.getGroupId());
+    	
+    	
+    	logger.info("isExist here is",isExist);
+    	logger.info("transactionDto here is " + transactionDto.getUsername());
+    	logger.info("transactionDto here is " + transactionDto.getTransactionPeriod());
+    	logger.info("transactionDto here is " + transactionDto.getYear());
     	
     	System.out.println("isExist here is " + isExist);
     	
@@ -69,12 +89,29 @@ public class TransactionService {
     	
         Group group = getGroupById(transactionDto.getGroupId());
         
+        if(transactionDto.getTransactionId() != 0) {
+        	System.out.println("Coming into transactionId not 0");
+        	Transaction transaction = transactionRepository.findById(transactionDto.getTransactionId());
+        	group.setTotalAmount(group.getTotalAmount() - transaction.getAmount());
+        	Integer id = transactionRepository.deleteById(transactionDto.getTransactionId());
+        	groupRepository.save(group);
+        }
+        
+        if(transactionDto.getStatus().equals("REVERT")) {
+        	System.out.println("coming into revert");
+        	return buildResponseUtils.buildSuccessResponseDto("Transaction deleted sucessfully", null);
+        }
         
         Transaction transaction = buildTransaction(transactionDto, group, member);
         transactionRepository.save(transaction);
         
-        group.setTotalAmount(group.getColletionAmount() + group.getTotalAmount());
+        group.setTotalAmount(transactionDto.getAmount() + group.getTotalAmount());
         groupRepository.save(group);
+        
+//        ProducerService transactionProducerService = kafkaProducerFactory.getProducer("Transaction");
+//        
+//        transactionProducerService.sendMessage("CreateTransaction", new CreateTransactionMessage(member.getName(),
+//        		member.getUsername(),transactionDto.getYear(),group.getColletionAmount(),transactionDto.getTransactionPeriod()));
         
         return buildResponseUtils.buildSuccessResponseDto("Transaction saved successfully", null);
     }
@@ -91,11 +128,12 @@ public class TransactionService {
         Transaction transaction = new Transaction();
         transaction.setMember(member);
         transaction.setUser_group(group);
-        transaction.setAmount(group.getColletionAmount());
+        transaction.setAmount(transactionDto.getAmount());
         transaction.setTransactionType(group.getCollectionType());
         transaction.setTransactionPeriod(transactionDto.getTransactionPeriod());
         transaction.setYear(transactionDto.getYear());
         transaction.setAddedBy(SecurityUtils.getUsername());
+        transaction.setStatus(transactionDto.getStatus());
         return transaction;
     }
 
@@ -117,6 +155,13 @@ public class TransactionService {
 		
 	    return buildResponseUtils.buildSuccessResponseDto("Transaction deleted sucessfully", null);
 	}
+    
+  
+    
+    
+
+    
+    
     
     
 }

@@ -13,6 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class ExpenseDtoResponse {
 	
+	private Long id;
 	private String description;
 	private int amount;
 	private LocalDateTime createdAt;

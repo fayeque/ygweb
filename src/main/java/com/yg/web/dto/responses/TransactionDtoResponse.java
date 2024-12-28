@@ -19,4 +19,5 @@ public class TransactionDtoResponse {
     private int year;
     private Integer amount;
     private LocalDateTime transactionDate;
+    private String status;
 }

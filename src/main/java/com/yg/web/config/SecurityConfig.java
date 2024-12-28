@@ -22,6 +22,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import com.yg.web.filter.JwtAuthFilter;
 
@@ -31,6 +33,21 @@ import com.yg.web.filter.JwtAuthFilter;
 public class SecurityConfig {
     @Autowired
     private JwtAuthFilter authFilter;
+    
+    @Bean
+    public WebMvcConfigurer corsConfigurer() {
+        return new WebMvcConfigurer() {
+            @Override
+            public void addCorsMappings(CorsRegistry registry) {
+                registry.addMapping("/**")
+                .allowedOrigins("http://localhost:3000") // React app's origin
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
+                .allowedHeaders("Authorization", "Content-Type") // Include Authorization header
+                .exposedHeaders("Authorization") // Expose headers if needed
+                .allowCredentials(true); 
+            }
+        };
+    }
 
     @Bean
     //authentication
@@ -50,10 +67,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
     	 System.out.println("inside securityFilterChain");
-        return http.csrf().disable()
+        return http.cors().and().csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/user/authenticate","/api/group/getGroupMembers/{groupId}","/api/user/addUser","/api/user/hello",
-                		"/api/expense/getExpense/**").permitAll()
+                .requestMatchers("/api/group/getGroups","/api/user/healthCheck","/api/user/authenticate","/api/group/getGroupMembers/**","/api/user/addUser","/api/user/hello",
+                "/api/expense/getExpense/**").permitAll()
                 .and()
                 .authorizeHttpRequests().requestMatchers("/api/**")
                 .authenticated().and()

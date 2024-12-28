@@ -58,6 +58,7 @@ public class ExpenseService {
 		
 		Group group = groupRepository.findById(createExpenseDto.getGroupId()).orElseThrow(() -> new ResourceNotFoundException("Group not found"));
 		group.setTotalAmount(group.getTotalAmount() - createExpenseDto.getAmount());
+		group.setTotalExpense(group.getTotalExpense() + createExpenseDto.getAmount()); 
 		groupRepository.save(group);
 		
 		return buildResponseUtils.buildSuccessResponseDto("Expense added Successfully", null);
@@ -78,6 +79,7 @@ public class ExpenseService {
 				.orElseThrow(() -> new ResourceNotFoundException("User does not have the permission"));
 		Optional<Group> group = groupRepository.findById(expense.getGroupId());
 		group.get().setTotalAmount(group.get().getTotalAmount() + expense.getAmount());
+		group.get().setTotalExpense(group.get().getTotalExpense() - expense.getAmount());
 		groupRepository.save(group.get());
 		expenseRepository.deleteById(expenseId);
 		
@@ -89,6 +91,8 @@ public class ExpenseService {
 		GroupExpenseDtoResponse groupExpenseDtoResponse = new GroupExpenseDtoResponse();
 		groupExpenseDtoResponse.setGroupId(group.getGroupId());
 		groupExpenseDtoResponse.setGroupName(group.getGroupName());
+		groupExpenseDtoResponse.setTotalExpense(group.getTotalExpense());
+		groupExpenseDtoResponse.setTotalAmount(group.getTotalAmount());
 		
 		List<ExpenseDtoResponse> result = expenses.stream().map(this::convertToExpenseDto).collect(Collectors.toList());
 		
@@ -99,6 +103,7 @@ public class ExpenseService {
 	
 	private ExpenseDtoResponse convertToExpenseDto(Expense expense) {
 		ExpenseDtoResponse expenseDtoResponse = new ExpenseDtoResponse();
+		expenseDtoResponse.setId(expense.getId());
 		expenseDtoResponse.setAmount(expense.getAmount());
 		expenseDtoResponse.setDescription(expense.getDescription());
 		expenseDtoResponse.setCreatedAt(expense.getCreatedAt());

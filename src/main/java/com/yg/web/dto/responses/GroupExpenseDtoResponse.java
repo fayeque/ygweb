@@ -15,5 +15,7 @@ public class GroupExpenseDtoResponse {
 
 	private Long groupId;
 	private String groupName;
+	private Integer totalExpense;
+	private Integer totalAmount;
 	List<ExpenseDtoResponse> expenseDtoResponses = new ArrayList<ExpenseDtoResponse>();
 }

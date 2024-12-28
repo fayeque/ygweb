@@ -40,14 +40,15 @@ public class MemberService {
 			member = new Member();
 			member.setName(memberDto.getName());
 			member.setUsername(memberDto.getUsername());
+			member.setEmailId(memberDto.getEmailId());
 			 member = memberRepository.save(member);
-		}else {
-			throw new GenericException("Member with the given username already exist");
 		}
 		
 		if(!group.getMembers().contains(member)) {
 			group.getMembers().add(member);
 			groupRepository.save(group);
+		}else {
+			throw new GenericException("Member with the given username already exist");
 		}
 		
 		return buildResponseUtils.buildSuccessResponseDto("Member added successfully", null);

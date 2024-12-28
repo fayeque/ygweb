@@ -14,5 +14,6 @@ public class MemberDto {
 	private String name; 
 	private String username;
 	private Long groupId;
+	private String emailId;
 
 }
