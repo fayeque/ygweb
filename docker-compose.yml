@@ -15,6 +15,7 @@ services:
       - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
     networks:
       - springboot-mysql-network
+
   mysqldb:
     image: mysql:8.0.33
     ports:
@@ -25,7 +26,7 @@ services:
       - MYSQL_USER=${MYSQL_USER}
       - MYSQL_PASSWORD=${MYSQL_PASSWORD}
     volumes:
-      - mysql-data:/var/lib/mysql
+      - /home/ec2-user/mysql-data:/var/lib/mysql
     networks:
       - springboot-mysql-network
     healthcheck:
@@ -33,8 +34,7 @@ services:
       retries: 10
       interval: 3s
       timeout: 30s
-volumes:
-  mysql-data:
+
 networks:
   springboot-mysql-network:
     name: springboot-mysql-network
