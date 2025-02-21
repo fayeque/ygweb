@@ -11,8 +11,8 @@ services:
         condition: service_healthy
     environment:
       - SPRING_DATASOURCE_URL=jdbc:mysql://mysqldb:3306/ygweb?useUnicode=true&characterEncoding=UTF-8&zeroDateTimeBehavior=convertToNull
-      - SPRING_DATASOURCE_USERNAME=${MYSQL_USER}
-      - SPRING_DATASOURCE_PASSWORD=${MYSQL_PASSWORD}
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=Fayeque123
     networks:
       - springboot-mysql-network
 
@@ -23,8 +23,6 @@ services:
     environment:
       - MYSQL_DATABASE=ygweb
       - MYSQL_ROOT_PASSWORD=Fayeque123
-      - MYSQL_USER=admin
-      - MYSQL_PASSWORD=Fayeque123
     volumes:
       - /home/ec2-user/mysql-data:/var/lib/mysql
     networks:
